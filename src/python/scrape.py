@@ -9,14 +9,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 MSSC_URL = 'https://mason.my.site.com/SelfServiceHC/s/'
 
+
 def scrape_topic(driver, url):
     print('Scraping', url)
     driver.get(url)
-    # All of the JavaScript on the page needs a few seconds to load; wait until 
+    # All of the JavaScript on the page needs a few seconds to load; wait until
     # at least one 'article-link' element has been loaded
     delay = 10
     try:
-        myElem = WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.CLASS_NAME, 'article-link')))
+        myElem = WebDriverWait(driver, delay).until(
+            EC.presence_of_element_located((By.CLASS_NAME, 'article-link')))
         print('Page is ready')
     except TimeoutException:
         print('Loading took too much time!')
@@ -24,13 +26,13 @@ def scrape_topic(driver, url):
         exit(1)
 
     needToLoadMore = True
-    while(needToLoadMore):
+    while needToLoadMore:
         buttons = driver.find_elements(By.CLASS_NAME, 'loadmore')
-        # as long as the 'loadmore' button exists, click it and then wait for 
+        # as long as the 'loadmore' button exists, click it and then wait for
         # more links to load into the page
         if len(buttons) > 0:
             buttons[0].click()
-            #wait for the new links to load before trying again
+            # wait for the new links to load before trying again
             time.sleep(3)
         else:
             needToLoadMore = False
@@ -40,6 +42,7 @@ def scrape_topic(driver, url):
     for article in articles:
         articleUrls.append(article.get_attribute('href'))
     return articleUrls
+
 
 def scrape_article(driver, url):
     print('Scraping article', url)
@@ -52,21 +55,24 @@ def scrape_article(driver, url):
 
     print(len(divs))
 
+
 if __name__ == '__main__':
     # TODO: Local ChromeDriver
     driver = webdriver.Chrome()
     # TODO: Remote web driver with Selenium Grid is an option
-    #options = webdriver.ChromeOptions()
-    #driver = webdriver.Remote(command_executor='http://localhost:4444', options=options)
+    # options = webdriver.ChromeOptions()
+    # driver = webdriver.Remote(
+    # command_executor='http://localhost:4444', options=options)
 
     print('Getting root URL')
     driver.get(MSSC_URL)
 
-    # All of the JavaScript on the page needs a few seconds to load; wait until 
+    # All of the JavaScript on the page needs a few seconds to load; wait until
     # at least one 'topicLink' element has been loaded
     delay = 10
     try:
-        myElem = WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.CLASS_NAME, 'topicLink')))
+        myElem = WebDriverWait(driver, delay).until(
+            EC.presence_of_element_located((By.CLASS_NAME, 'topicLink')))
         print('Page is ready')
     except TimeoutException:
         print('Loading took too much time!')
