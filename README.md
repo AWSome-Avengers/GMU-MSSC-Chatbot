@@ -25,11 +25,6 @@ The overall project goal is to develop an AI chatbot that effectively integrates
 
 ### Running Manually
 
-#### Docker Prequisites
-
-1. Install the latest version of [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-1. Launch Selenium Grid Standalone with Chrome with the command `docker run -d -p 4444:4444 -p 7900:7900 --shm-size="2g" selenium/standalone-chrome:latest`
-
 #### Python Prerequisites
 
 1. Install the latest version of [Python 3](https://www.python.org/)
