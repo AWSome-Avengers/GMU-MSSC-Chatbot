@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import time
 
 from selenium import webdriver
@@ -12,7 +13,6 @@ MSSC_URL = 'https://mason.my.site.com/SelfServiceHC/s/'
 
 
 def scrape_topic(driver, url):
-    print('Scraping', url)
     driver.get(url)
     # All of the JavaScript on the page needs a few seconds to load; wait until
     # at least one 'article-link' element has been loaded
@@ -20,12 +20,10 @@ def scrape_topic(driver, url):
     try:
         myElem = WebDriverWait(driver, delay).until(
             EC.presence_of_element_located((By.CLASS_NAME, 'article-link')))
-        print('Page is ready')
     except TimeoutException:
         print('Loading took too much time!')
         driver.close()
         exit(1)
-
     needToLoadMore = True
     while needToLoadMore:
         buttons = driver.find_elements(By.CLASS_NAME, 'loadmore')
@@ -46,56 +44,47 @@ def scrape_topic(driver, url):
 
 
 def scrape_article(driver, url):
-    print('Scraping article', url)
+    results = {}
+    results['url'] = url
     driver.get(url)
     # All of the JavaScript on the page needs a few seconds to load
     time.sleep(3)
-    divs = driver.find_elements(By.CLASS_NAME, 'uiOutputRichText')
-
-    # TODO: Find 1) question, 2) answer, 3) tags, 4) last-modified-date
-
-    print(len(divs))
+    divs = driver.find_elements(By.TAG_NAME, 'div')
+    for div in divs:
+        if div.get_attribute('data-target-selection-name') == 'sfdc:RecordField.Knowledge__kav.Question__c':
+            results['question'] = div.get_attribute('innerText').strip()
+        elif div.get_attribute('data-target-selection-name') == 'sfdc:RecordField.Knowledge__kav.Answer__c':
+            results['answer'] = div.get_attribute('innerText').strip()
+    # TODO: 1) tags, 2) last-modified-date
+    # last-modified-data is <span class=uiOutputDate ...>Jan 5, 2024</span>
+    return results
 
 
 if __name__ == '__main__':
-    # TODO: Local ChromeDriver
     driver = webdriver.Chrome()
-    # TODO: Remote web driver with Selenium Grid is an option
-    # options = webdriver.ChromeOptions()
-    # driver = webdriver.Remote(
-    # command_executor='http://localhost:4444', options=options)
-
-    print('Getting root URL')
     driver.get(MSSC_URL)
-
     # All of the JavaScript on the page needs a few seconds to load; wait until
     # at least one 'topicLink' element has been loaded
-    delay = 10
     try:
-        myElem = WebDriverWait(driver, delay).until(
+        myElem = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, 'topicLink')))
-        print('Page is ready')
     except TimeoutException:
         print('Loading took too much time!')
         driver.close()
         exit(1)
-
     topics = driver.find_elements(By.CLASS_NAME, 'topicLink')
-    print(len(topics), "topics found on the main page")
     topicUrls = []
     for topic in topics:
         topicUrl = topic.get_attribute('href')
         topicUrls.append(topicUrl)
-
     articleUrls = []
     for url in topicUrls:
         urls = scrape_topic(driver, url)
-        print(len(urls))
         articleUrls.extend(urls)
-        print(len(articleUrls))
-
+    results = []
     for url in articleUrls:
-        scrape_article(driver, url)
-
-    print("Done scraping")
+        result = scrape_article(driver, url)
+        # print(json.dumps(result))
+        results.extend(result)
+    print(json.dumps(results))
     driver.close()
