@@ -17,11 +17,14 @@ def scrape_article(driver, url):
     time.sleep(3)
     divs = driver.find_elements(By.TAG_NAME, 'div')
     for div in divs:
-        if div.get_attribute('data-target-selection-name') == 'sfdc:RecordField.Knowledge__kav.Question__c':
+        if div.get_attribute('data-target-selection-name') == \
+                'sfdc:RecordField.Knowledge__kav.Question__c':
             results['question'] = div.get_attribute('innerText').strip()
-        elif div.get_attribute('data-target-selection-name') == 'sfdc:RecordField.Knowledge__kav.Answer__c':
+        elif div.get_attribute('data-target-selection-name') == \
+                'sfdc:RecordField.Knowledge__kav.Answer__c':
             results['answer'] = div.get_attribute('innerText').strip()
-    results['date'] = driver.find_element(By.CLASS_NAME, 'date').get_attribute('innerText').strip()
+    results['date'] = driver.find_element(By.CLASS_NAME, 'date')\
+        .get_attribute('innerText').strip()
     tagList = driver.find_elements(By.CLASS_NAME, 'slds-pill')
     for tag in tagList:
         results['tags'].append(tag.get_attribute('innerText'))
