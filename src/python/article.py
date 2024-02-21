@@ -8,6 +8,10 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 
+ANSWER_DIV = 'sfdc:RecordField.Knowledge__kav.Answer__c'
+QUESTION_DIV = 'sfdc:RecordField.Knowledge__kav.Question__c'
+
+
 def scrape_article(driver, url):
     results = {}
     results['url'] = url
@@ -17,11 +21,9 @@ def scrape_article(driver, url):
     time.sleep(3)
     divs = driver.find_elements(By.TAG_NAME, 'div')
     for div in divs:
-        if div.get_attribute('data-target-selection-name') == \
-                'sfdc:RecordField.Knowledge__kav.Question__c':
+        if div.get_attribute('data-target-selection-name') == QUESTION_DIV:
             results['question'] = div.get_attribute('innerText').strip()
-        elif div.get_attribute('data-target-selection-name') == \
-                'sfdc:RecordField.Knowledge__kav.Answer__c':
+        elif div.get_attribute('data-target-selection-name') == ANSWER_DIV:
             results['answer'] = div.get_attribute('innerText').strip()
     results['date'] = driver.find_element(By.CLASS_NAME, 'date')\
         .get_attribute('innerText').strip()
